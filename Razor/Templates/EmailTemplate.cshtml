@@ -1,0 +1,62 @@
+@model YprojectUserService.Razor.Models.EmailModel
+
+<html>
+<head>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        .email-container {
+            font-family: 'Montserrat', Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0fafa;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .email-header {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .email-subtitle {
+            font-size: 18px;
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 15px;
+        }
+        .email-code {
+            font-size: 32px;
+            font-weight: 800;
+            color: #121C4C;
+            margin: 20px 0;
+        }
+        .email-body {
+            font-size: 16px;
+            font-weight: 400;
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .email-footer {
+            font-size: 14px;
+            color: #777;
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="email-container">
+    <div class="email-header">@Model.Title</div>
+    <div class="email-subtitle">@Model.Subtitle</div>
+    <div class="email-code">@Model.Code</div>
+    <div class="email-body">@Model.Body</div>
+    <div class="email-footer">
+        If this email is unfamiliar, please contact @Model.SupportEmail<br />
+        &copy; @DateTime.Now.Year Y-Project
+    </div>
+</div>
+</body>
+</html>

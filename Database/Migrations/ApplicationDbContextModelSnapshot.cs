@@ -24,11 +24,8 @@ namespace YprojectUserService.Database.Migrations
 
             modelBuilder.Entity("YprojectUserService.UserFolder.Entities.User", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("Birthday")
                         .HasColumnType("timestamp with time zone");
@@ -41,12 +38,14 @@ namespace YprojectUserService.Database.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Login")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<bool>("IsEmailVerified")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Password")
                         .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("RecoveryCode")
                         .HasColumnType("text");
 
                     b.Property<int>("Sex")

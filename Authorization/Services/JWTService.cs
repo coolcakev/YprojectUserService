@@ -14,12 +14,11 @@ namespace YprojectUserService.Authorization.Services
             _authOptions = authOptions.Value;
         }
 
-        public string GenerateToken(long id, string login, string email)
+        public string GenerateToken(string id, string email)
         {
             var claims = new List<Claim>
             {
-                new("id", id.ToString()),
-                new("login", login),
+                new("id", id),
                 new("userEmail", email)
             };
 

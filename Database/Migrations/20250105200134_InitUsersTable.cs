@@ -1,13 +1,12 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 namespace YprojectUserService.Database.Migrations
 {
     /// <inheritdoc />
-    public partial class UserTable : Migration
+    public partial class InitUsersTable : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -16,12 +15,12 @@ namespace YprojectUserService.Database.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<string>(type: "text", nullable: false),
                     Email = table.Column<string>(type: "text", nullable: false),
-                    Login = table.Column<string>(type: "text", nullable: false),
+                    IsEmailVerified = table.Column<bool>(type: "boolean", nullable: false),
                     Password = table.Column<string>(type: "text", nullable: false),
                     CodeWord = table.Column<string>(type: "text", nullable: false),
+                    RecoveryCode = table.Column<string>(type: "text", nullable: true),
                     Birthday = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Sex = table.Column<int>(type: "integer", nullable: false)
                 },

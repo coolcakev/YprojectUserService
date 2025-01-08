@@ -25,13 +25,15 @@ public class Handler: IRequestHandler<LoginRequest, Response<string>>
     public async Task<Response<string>> Handle(LoginRequest request, CancellationToken cancellationToken)
     {
         var user = await _context.Users
-            .FirstOrDefaultAsync(x => x.Login == request.Body.Login, cancellationToken);
+            .FirstOrDefaultAsync(x => x.Id == request.Body.Login || x.Email == request.Body.Login, cancellationToken);
+        
         if (user == null) return FailureResponses.NotFound<string>("User login invalid");
 
-        var checkPass = !BCrypt.Net.BCrypt.Verify(request.Body.Password, user.Password);
-        if (checkPass) return FailureResponses.NotFound<string>("Password invalid");
+        var checkPass = BCrypt.Net.BCrypt.Verify(request.Body.Password, user.Password);
         
-        var token = _jWtService.GenerateToken(user.Id, user.Login, user.Email);
+        if (!checkPass) return FailureResponses.NotFound<string>("Password invalid");
+        
+        var token = _jWtService.GenerateToken(user.Id, user.Email);
 
         return SuccessResponses.Ok(token);
     }

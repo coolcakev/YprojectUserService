@@ -9,9 +9,13 @@ public static class CorsConfig
         {
             policy
                 .WithOrigins(
+                    "https://localhost:8081",
+                    "http://localhost:8081",
+                    "http://192.168.0.151:8081",
+                    "https://192.168.0.151:8081",
                     "https://localhost:3000", 
                     "http://localhost:3000"
-                    )
+                )
                 .AllowAnyMethod()
                 .AllowAnyHeader()
                 .AllowCredentials();

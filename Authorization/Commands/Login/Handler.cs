@@ -33,7 +33,7 @@ public class Handler: IRequestHandler<LoginRequest, Response<string>>
         
         if (!checkPass) return FailureResponses.NotFound<string>("Password invalid");
         
-        var token = _jWtService.GenerateToken(user.Id, user.Email);
+        var token = _jWtService.GenerateToken(user.Id, user.Email, false);
 
         return SuccessResponses.Ok(token);
     }

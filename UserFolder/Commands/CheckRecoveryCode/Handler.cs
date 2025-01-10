@@ -10,7 +10,6 @@ namespace YprojectUserService.UserFolder.Commands.CheckRecoveryCode;
 public record CheckRecoveryCodeRequest([FromBody] CheckRecoveryCodeBody Body) : IHttpRequest<CheckRecoveryCodeResponse>;
 
 public record CheckRecoveryCodeBody(
-    string Email, 
     string Code
 );
 
@@ -19,18 +18,23 @@ public record CheckRecoveryCodeResponse(bool Success, string Message);
 public class Handler : IRequestHandler<CheckRecoveryCodeRequest, y_nuget.Endpoints.Response<CheckRecoveryCodeResponse>>
 {
     private readonly ApplicationDbContext _dbContext;
-    private readonly IPublishEndpoint _publishEndpoint;
-    
-    public Handler(ApplicationDbContext dbContext, IPublishEndpoint publishEndpoint)
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    public Handler(ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor)
     {
         _dbContext = dbContext;
-        _publishEndpoint = publishEndpoint;
+        _httpContextAccessor = httpContextAccessor;
     }
      
     public async Task<y_nuget.Endpoints.Response<CheckRecoveryCodeResponse>> Handle(CheckRecoveryCodeRequest request, CancellationToken cancellationToken)
     {
+        var userEmailFromToken = _httpContextAccessor.HttpContext?
+            .User
+            .Claims
+            .FirstOrDefault(c => c.Type == "userEmail")?
+            .Value;
+        
         var user = await _dbContext.Users
-            .FirstOrDefaultAsync(e => e.Email == request.Body.Email, cancellationToken);
+            .FirstOrDefaultAsync(e => e.Email == userEmailFromToken, cancellationToken);
         
         if (user == null)
         {
@@ -39,7 +43,7 @@ public class Handler : IRequestHandler<CheckRecoveryCodeRequest, y_nuget.Endpoin
             );
         } 
         
-        var checkResult = BCrypt.Net.BCrypt.Verify(request.Body.Code, user.Password);
+        var checkResult = BCrypt.Net.BCrypt.Verify(request.Body.Code, user.CodeWord);
         
         if (!checkResult)
         {

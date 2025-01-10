@@ -39,6 +39,16 @@
             line-height: 1.6;
             margin-bottom: 20px;
         }
+        .email-button a {
+            display: inline-block;
+            padding: 12px 64px;
+            background-color: #01A6AF;
+            color: #FEFEFF;
+            text-decoration: none;
+            font-weight: 600;
+            border-radius: 10px;
+            font-family: 'Montserrat', Arial, sans-serif;
+        }
         .email-footer {
             font-size: 14px;
             color: #777;
@@ -52,7 +62,14 @@
     <div class="email-header">@Model.Title</div>
     <div class="email-subtitle">@Model.Subtitle</div>
     <div class="email-code">@Model.Code</div>
+    <div class="email-button">
+        @if (Model.EmailButton != null)
+        {
+        <a href="@Model.EmailButton.Link">@Model.EmailButton.Text</a>
+        }
+    </div>
     <div class="email-body">@Model.Body</div>
+
     <div class="email-footer">
         If this email is unfamiliar, please contact @Model.SupportEmail<br />
         &copy; @DateTime.Now.Year Y-Project

@@ -1,39 +1,49 @@
 using MassTransit;
 using MediatR;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using y_nuget.Endpoints;
+using y_nuget.RabbitMq;
 using YprojectUserService.Database;
 using YprojectUserService.Razor;
 using YprojectUserService.Razor.Models;
 
 namespace YprojectUserService.UserFolder.Commands.CreateRecoveryCode;
 
-public record CreateRecoveryCodeRequest([FromBody] CreateRecoveryCodeBody Body) : IHttpRequest<EmptyValue>;
-
-public record CreateRecoveryCodeBody(
-    string Email
-);
-
-public record RecoveryCodeMessage(string To, string Subject, string Html);
-
+public record CreateRecoveryCodeRequest() : IHttpRequest<EmptyValue>;
 public class Handler : IRequestHandler<CreateRecoveryCodeRequest, y_nuget.Endpoints.Response<EmptyValue>>
 {
     private readonly ApplicationDbContext _dbContext;
     private readonly IPublishEndpoint _publishEndpoint;
-    private readonly RazorRenderer _razorRenderer; // Додано RazorRenderer
+    private readonly RazorRenderer _razorRenderer;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public Handler(ApplicationDbContext dbContext, IPublishEndpoint publishEndpoint, RazorRenderer razorRenderer)
+    public Handler(
+        ApplicationDbContext dbContext, 
+        IPublishEndpoint publishEndpoint, 
+        RazorRenderer razorRenderer, 
+        IHttpContextAccessor httpContextAccessor)
     {
         _dbContext = dbContext;
         _publishEndpoint = publishEndpoint;
-        _razorRenderer = razorRenderer; // Ініціалізація RazorRenderer
+        _razorRenderer = razorRenderer;
+        _httpContextAccessor = httpContextAccessor;
     }
      
     public async Task<y_nuget.Endpoints.Response<EmptyValue>> Handle(CreateRecoveryCodeRequest request, CancellationToken cancellationToken)
     {
+        var userEmailFromToken = _httpContextAccessor.HttpContext?
+            .User
+            .Claims
+            .FirstOrDefault(c => c.Type == "userEmail")?
+            .Value;
+
+        if (string.IsNullOrEmpty(userEmailFromToken))
+        {
+            return FailureResponses.BadRequest("Token has not email data");
+        }
+        
         var user = await _dbContext.Users
-            .FirstOrDefaultAsync(e => e.Email == request.Body.Email, cancellationToken);
+            .FirstOrDefaultAsync(e => e.Email == userEmailFromToken, cancellationToken);
         
         if (user == null)
         {
@@ -44,13 +54,12 @@ public class Handler : IRequestHandler<CreateRecoveryCodeRequest, y_nuget.Endpoi
         
         var random = new Random();
         var code = random.Next(100000, 999999).ToString();
-
+        
         var hashCode = BCrypt.Net.BCrypt.HashPassword(code);
-
+        
         user.CodeWord = hashCode;
         await _dbContext.SaveChangesAsync(cancellationToken);
         
-        // Створюємо модель для шаблону
         var emailModel = new EmailModel
         {
             Title = "Reset your secret",
@@ -58,12 +67,10 @@ public class Handler : IRequestHandler<CreateRecoveryCodeRequest, y_nuget.Endpoi
             Code = code
         };
 
-        // Генеруємо HTML з шаблону
         var html = await _razorRenderer.RenderAsync("EmailTemplate.cshtml", emailModel);
 
-        // Відправляємо повідомлення
-        await _publishEndpoint.Publish(new RecoveryCodeMessage(
-            To: request.Body.Email,
+        await _publishEndpoint.Publish(new EmailMessage(
+            To: userEmailFromToken,
             Subject: "Recovery Code Request",
             Html: html
         ));

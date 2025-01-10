@@ -1,9 +1,13 @@
 using Bogus;
+using MassTransit;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using y_nuget.Endpoints;
+using y_nuget.RabbitMq;
 using YprojectUserService.Database;
+using YprojectUserService.Razor;
+using YprojectUserService.Razor.Models;
 using YprojectUserService.UserFolder.Entities;
 
 namespace YprojectUserService.Authorization.Commands.RegisterUser;
@@ -18,17 +22,22 @@ public record RegisterUserBody(
     SexType Sex
 );
 
-public class Handler: IRequestHandler<RegisterUserRequest, Response<EmptyValue>>
+public class Handler: IRequestHandler<RegisterUserRequest, y_nuget.Endpoints.Response<EmptyValue>>
 {
     private readonly ApplicationDbContext _context;
-    private static readonly Faker _faker = new Faker();
+    private readonly IPublishEndpoint _publishEndpoint;
+    private readonly RazorRenderer _razorRenderer;
 
-    public Handler(ApplicationDbContext context, Faker faker)
+    private static readonly Faker Faker = new Faker();
+
+    public Handler(ApplicationDbContext context, IPublishEndpoint publishEndpoint, RazorRenderer razorRenderer)
     {
         _context = context;
+        _publishEndpoint = publishEndpoint;
+        _razorRenderer = razorRenderer;
     }
     
-    public async Task<Response<EmptyValue>> Handle(RegisterUserRequest request, CancellationToken cancellationToken)
+    public async Task<y_nuget.Endpoints.Response<EmptyValue>> Handle(RegisterUserRequest request, CancellationToken cancellationToken)
     {
         var user = await _context.Users.FirstOrDefaultAsync(x => 
             x.Email == request.Body.Email,
@@ -51,7 +60,27 @@ public class Handler: IRequestHandler<RegisterUserRequest, Response<EmptyValue>>
             Sex = request.Body.Sex,
             IsEmailVerified = false,
         };
-
+        
+        var emailModel = new EmailModel
+        {
+            Title = "Verify your account",
+            Subtitle = "Your account has been successfully created!  Verify your email so we can be sure it's you. This is your unique login that is available to all users",
+            Code = uniqueLogin,
+            EmailButton = new EmailButton()
+            {
+                Link = "http://example.com",
+                Text = "CLICK TO VERIFY"
+            }
+        };
+        
+        var html = await _razorRenderer.RenderAsync("EmailTemplate.cshtml", emailModel);
+        
+        await _publishEndpoint.Publish(new EmailMessage(
+            To: request.Body.Email,
+            Subject: "Recovery Code Request",
+            Html: html
+        ));
+        
         await _context.Users.AddAsync(user, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
         
@@ -60,8 +89,8 @@ public class Handler: IRequestHandler<RegisterUserRequest, Response<EmptyValue>>
 
     private string GenerateUniqueLogin(int lettersCount, int digitsCount)
     {
-        string letters = _faker.Random.String2(lettersCount, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-        string digits = _faker.Random.String2(digitsCount, "0123456789");
+        string letters = Faker.Random.String2(lettersCount, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+        string digits = Faker.Random.String2(digitsCount, "0123456789");
         return letters + digits;
     }
 }

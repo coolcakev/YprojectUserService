@@ -1,5 +1,8 @@
 using Bogus;
 using MassTransit;
+using Microsoft.Extensions.Options;
+using RabbitMQ.Client;
+using y_nuget.RabbitMq;
 using YprojectUserService.Authorization;
 using YprojectUserService.Database;
 using YprojectUserService.Razor;
@@ -12,6 +15,7 @@ public static class Configuration
     {   
         var configuration = builder.Configuration;
         
+        services.Configure<RabbitMqSettings>(configuration.GetSection("RabbitMQ"));
         services.AddDataBaseConfig(configuration);
         services.AddCorsConfig();
         services.AddHttpContextAccessor();
@@ -23,11 +27,24 @@ public static class Configuration
         {
             x.UsingRabbitMq((context, cfg) =>
             {
-                cfg.Host("localhost", "/", h =>
+                var rabbitMqSettings = context.GetRequiredService<IOptions<RabbitMqSettings>>().Value;
+                cfg.Host(rabbitMqSettings.Host, rabbitMqSettings.VirtualHost, h =>
                 {
-                    h.Username("guest");
-                    h.Password("guest");
+                    h.Username(rabbitMqSettings.Username);
+                    h.Password(rabbitMqSettings.Password);
                 });
+
+                cfg.Message<EmailMessage>(config =>
+                {
+                    config.SetEntityName("SendEmailExchange.fanout");
+                });
+
+                cfg.Publish<EmailMessage>(publishConfig =>
+                {
+                    publishConfig.ExchangeType = ExchangeType.Fanout;
+                });
+                
+                cfg.ConfigureEndpoints(context);
             });
         });
 

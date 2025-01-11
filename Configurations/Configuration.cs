@@ -13,7 +13,6 @@ public static class Configuration
         var configuration = builder.Configuration;
         
         services.AddDataBaseConfig(configuration);
-        services.AddCorsConfig();
         services.AddHttpContextAccessor();
         services.AddSwaggerGen();
         services.AddAuthConfig();

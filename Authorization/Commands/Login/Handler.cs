@@ -26,11 +26,11 @@ public class Handler: IRequestHandler<LoginRequest, Response<string>>
     {
         var user = await _context.Users
             .FirstOrDefaultAsync(x => x.Id == request.Body.Login || x.Email == request.Body.Login, cancellationToken);
-        
+        //TODO тут треба подумати, бо у нас додаток локалізований
         if (user == null) return FailureResponses.NotFound<string>("User login invalid");
 
         var checkPass = BCrypt.Net.BCrypt.Verify(request.Body.Password, user.Password);
-        
+        //TODO тут треба подумати, бо у нас додаток локалізований
         if (!checkPass) return FailureResponses.NotFound<string>("Password invalid");
         
         var token = _jWtService.GenerateToken(user.Id, user.Email, false);

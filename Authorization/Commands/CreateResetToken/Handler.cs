@@ -27,6 +27,8 @@ public class Handler: IRequestHandler<CreateResetTokenRequest, Response<string>>
 
         if (user is null)
         {
+            //TODO тут треба подумати, бо у нас додаток локалізований
+            //TODO тут потрібно буде відсилати NotFound, передивися по всьому проекті
             return FailureResponses.BadRequest<string>("User not found");
         }
         

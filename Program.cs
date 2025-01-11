@@ -16,6 +16,8 @@ builder.Services.AddYNugetConfiguration(builder);
 
 var app = builder.Build();
 
+
+//TODO нащо тобі цей міддлвар
 app.Use(async (context, next) =>
 {
     if (context.Request.Headers.TryGetValue(AuthService.HeaderParsedToken, out var claimsJsonValues))

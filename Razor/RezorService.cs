@@ -9,6 +9,7 @@ namespace YprojectUserService.Razor
         public RazorRenderer()
         {
             var projectRoot = Directory.GetCurrentDirectory();
+                //TODO тут немає тягнутися все з папки TEmplates
             var templatesFolder = Path.Combine(projectRoot, "Razor", "Templates");
 
             _engine = new RazorLightEngineBuilder()

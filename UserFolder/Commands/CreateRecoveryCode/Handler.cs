@@ -31,6 +31,7 @@ public class Handler : IRequestHandler<CreateRecoveryCodeRequest, y_nuget.Endpoi
      
     public async Task<y_nuget.Endpoints.Response<EmptyValue>> Handle(CreateRecoveryCodeRequest request, CancellationToken cancellationToken)
     {
+        //TODO це має тягнутися з AuthService перегялнути по всьому проекті
         var userEmailFromToken = _httpContextAccessor.HttpContext?
             .User
             .Claims
@@ -41,7 +42,8 @@ public class Handler : IRequestHandler<CreateRecoveryCodeRequest, y_nuget.Endpoi
         {
             return FailureResponses.BadRequest("Token has not email data");
         }
-        
+        //TODO тут краще шукати по id користувача, а не по email
+
         var user = await _dbContext.Users
             .FirstOrDefaultAsync(e => e.Email == userEmailFromToken, cancellationToken);
         
@@ -57,6 +59,7 @@ public class Handler : IRequestHandler<CreateRecoveryCodeRequest, y_nuget.Endpoi
         
         var hashCode = BCrypt.Net.BCrypt.HashPassword(code);
         
+        //TODO чому ми тут сетаємо згенерований код в CodeWord, а не в recoveryCode
         user.CodeWord = hashCode;
         await _dbContext.SaveChangesAsync(cancellationToken);
         

@@ -29,6 +29,7 @@ public class Handler: IRequestHandler<GetUserByIdRequest, Response<GetUserByIdRe
     
     public async Task<Response<GetUserByIdResponse>> Handle(GetUserByIdRequest request, CancellationToken cancellationToken)
     {
+        //TODO забрати цю змінну
         var currentUser = _authService.GetCurrentUser();
 
         var user = await _context.Users.FindAsync(request.Id);

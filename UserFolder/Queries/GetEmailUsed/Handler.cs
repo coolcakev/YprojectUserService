@@ -6,6 +6,7 @@ using YprojectUserService.Database;
 
 namespace YprojectUserService.UserFolder.Queries.GetEmailUsed;
 
+//TODO тут нема сенсу приймати цілий обєкт і відправляти обєкт
 public record GetEmailUsedRequest([FromBody] GetEmailUsedBody Body) : IHttpRequest<GetEmailUsedResponse>;
 public record GetEmailUsedResponse(
     bool IsUsed

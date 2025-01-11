@@ -45,7 +45,8 @@ public class Handler: IRequestHandler<RegisterUserRequest, y_nuget.Endpoints.Res
         var user = await _context.Users.FirstOrDefaultAsync(x => 
             x.Email == request.Body.Email,
             cancellationToken);
-
+        
+        //TODO тут треба подумати, бо у нас додаток локалізований переглянути по всьому проекті
         if (user != null) return FailureResponses.BadRequest("Login or Email are already register");
 
         var hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Body.Password);
@@ -90,6 +91,7 @@ public class Handler: IRequestHandler<RegisterUserRequest, y_nuget.Endpoints.Res
         await _context.Users.AddAsync(user, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
         
+        //TODO тут потрібно буде вертати токен, бо користувач вже авторизувався після успішної реєстрації
         return SuccessResponses.Ok();
     }
 

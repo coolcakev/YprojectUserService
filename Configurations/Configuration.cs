@@ -22,6 +22,7 @@ public static class Configuration
         services.AddAuthConfig();
         builder.Services.AddSingleton<Faker>();
         builder.Services.AddTransient<RazorRenderer>();
+        //TODO винести в окрему конфігурацію
         builder.Services.AddMassTransit(x =>
         {
             x.UsingRabbitMq((context, cfg) =>
@@ -33,11 +34,13 @@ public static class Configuration
                     h.Password(rabbitMqSettings.Password);
                 });
 
+                //TODO подивитися чи можна це винести, щоб не прописувати це для кожного меседжа
                 cfg.Message<EmailMessage>(config =>
                 {
                     config.SetEntityName("SendEmailExchange.fanout");
                 });
-
+                
+                //TODO подивитися чи можна це винести, щоб не прописувати це для кожного меседжа
                 cfg.Publish<EmailMessage>(publishConfig =>
                 {
                     publishConfig.ExchangeType = ExchangeType.Fanout;

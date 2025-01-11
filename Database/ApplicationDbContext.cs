@@ -13,6 +13,7 @@ namespace YprojectUserService.Database
         {
         }
         
+        // TODO: remove
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
         }

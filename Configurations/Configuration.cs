@@ -17,7 +17,6 @@ public static class Configuration
         
         services.Configure<RabbitMqSettings>(configuration.GetSection("RabbitMQ"));
         services.AddDataBaseConfig(configuration);
-        services.AddCorsConfig();
         services.AddHttpContextAccessor();
         services.AddSwaggerGen();
         services.AddAuthConfig();

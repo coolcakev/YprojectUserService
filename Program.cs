@@ -38,7 +38,6 @@ app.Use(async (context, next) =>
 
 
 app.MapEndpoints();
-app.UseCors(CorsConfig.CorsKey);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

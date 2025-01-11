@@ -19,7 +19,10 @@ public record RegisterUserBody(
     string Password,
     DateTime Birthday,
     string CodeWord,
-    SexType Sex
+    SexType Sex,
+    string CountryISO,
+    string StateISO,
+    int CityId
 );
 
 public class Handler: IRequestHandler<RegisterUserRequest, y_nuget.Endpoints.Response<EmptyValue>>
@@ -59,6 +62,9 @@ public class Handler: IRequestHandler<RegisterUserRequest, y_nuget.Endpoints.Res
             CodeWord = hashedCodeWord,
             Sex = request.Body.Sex,
             IsEmailVerified = false,
+            CountryISO = request.Body.CountryISO,
+            StateISO = request.Body.StateISO,
+            CityId = request.Body.CityId
         };
         
         var emailModel = new EmailModel

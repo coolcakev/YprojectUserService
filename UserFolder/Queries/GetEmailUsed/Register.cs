@@ -6,6 +6,6 @@ public class Register: IEndpoint
 {
     public void MapEndpoint(RouteGroupBuilder app)
     {
-        app.MediateGet<GetEmailUsedRequest, GetEmailUsedResponse>("user/email-is-used");
+        app.MediatePost<GetEmailUsedRequest, GetEmailUsedResponse>("user/email-is-used");
     }
 }

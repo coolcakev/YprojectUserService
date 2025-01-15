@@ -18,8 +18,6 @@ public class User
     public string? RecoveryCode { get; set; }
     public DateTime Birthday { get; set; }
     public SexType Sex { get; set; }
-
-    // TODO NEED COUNTRY LOGIC
     public string CountryISO { get; set; }
     public string StateISO { get; set; }
     public int CityId { get; set; }

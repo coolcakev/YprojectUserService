@@ -1,6 +1,7 @@
 using MassTransit;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using y_nuget.Auth;
 using y_nuget.Endpoints;
 using y_nuget.RabbitMq;
 using YprojectUserService.Database;
@@ -13,45 +14,40 @@ public record CreateRecoveryCodeRequest() : IHttpRequest<EmptyValue>;
 public class Handler : IRequestHandler<CreateRecoveryCodeRequest, y_nuget.Endpoints.Response<EmptyValue>>
 {
     private readonly ApplicationDbContext _dbContext;
-    private readonly IPublishEndpoint _publishEndpoint;
+    private readonly ISendEndpointProvider _publishEndpoint;
     private readonly RazorRenderer _razorRenderer;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-
+    private readonly AuthService _authService;
+    private readonly IBus _bus;
     public Handler(
         ApplicationDbContext dbContext, 
-        IPublishEndpoint publishEndpoint, 
+        ISendEndpointProvider publishEndpoint, 
         RazorRenderer razorRenderer, 
-        IHttpContextAccessor httpContextAccessor)
+        AuthService authService,
+        IBus bus
+        )
     {
         _dbContext = dbContext;
         _publishEndpoint = publishEndpoint;
         _razorRenderer = razorRenderer;
-        _httpContextAccessor = httpContextAccessor;
+        _authService = authService;
+        _bus = bus;
     }
      
     public async Task<y_nuget.Endpoints.Response<EmptyValue>> Handle(CreateRecoveryCodeRequest request, CancellationToken cancellationToken)
     {
-        //TODO це має тягнутися з AuthService перегялнути по всьому проекті
-        var userEmailFromToken = _httpContextAccessor.HttpContext?
-            .User
-            .Claims
-            .FirstOrDefault(c => c.Type == "userEmail")?
-            .Value;
+        var currentUser = _authService.GetCurrentUser();
 
-        if (string.IsNullOrEmpty(userEmailFromToken))
+        if (currentUser is null)
         {
-            return FailureResponses.BadRequest("Token has not email data");
+            return FailureResponses.NotFound("userNotFound");
         }
-        //TODO тут краще шукати по id користувача, а не по email
-
+        
         var user = await _dbContext.Users
-            .FirstOrDefaultAsync(e => e.Email == userEmailFromToken, cancellationToken);
+            .FirstOrDefaultAsync(e => e.Id == currentUser.Id, cancellationToken);
         
         if (user == null)
         {
-            return FailureResponses.BadRequest<EmptyValue>(
-                "User not found."
-            );
+            return FailureResponses.NotFound("userNotFound");
         } 
         
         var random = new Random();
@@ -59,8 +55,7 @@ public class Handler : IRequestHandler<CreateRecoveryCodeRequest, y_nuget.Endpoi
         
         var hashCode = BCrypt.Net.BCrypt.HashPassword(code);
         
-        //TODO чому ми тут сетаємо згенерований код в CodeWord, а не в recoveryCode
-        user.CodeWord = hashCode;
+        user.RecoveryCode = hashCode;
         await _dbContext.SaveChangesAsync(cancellationToken);
         
         var emailModel = new EmailModel
@@ -70,10 +65,10 @@ public class Handler : IRequestHandler<CreateRecoveryCodeRequest, y_nuget.Endpoi
             Code = code
         };
 
-        var html = await _razorRenderer.RenderAsync("EmailTemplate.cshtml", emailModel);
+        var html = await _razorRenderer.RenderAsync("Razor/Templates/EmailTemplate.cshtml", emailModel);
 
-        await _publishEndpoint.Publish(new EmailMessage(
-            To: userEmailFromToken,
+        await _bus.Publish(new EmailMessage(
+            To: user.Email,
             Subject: "Recovery Code Request",
             Html: html
         ));

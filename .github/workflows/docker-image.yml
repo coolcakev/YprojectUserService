@@ -1,0 +1,30 @@
+name: Docker Image CI our production
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+     # Step 1: Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2: Log in to Docker Hub
+      - name: Log in to Docker Hub
+        run: echo vitalikkravez11 | docker login -u vitalikkravez1@gmail.com --password-stdin
+
+      # Step 3: Build the Docker image
+      - name: Build the Docker image
+        run: docker build . --file Dockerfile --tag vitalikkrav/y-project-user-service --build-arg ASPNETCORE_ENVIRONMENT=Production
+
+      # Step 4: Push the Docker image to Docker Hub
+      - name: Push the Docker image
+        run: docker push vitalikkrav/y-project-user-service

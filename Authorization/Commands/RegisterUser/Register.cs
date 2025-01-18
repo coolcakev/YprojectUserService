@@ -6,6 +6,6 @@ public class Register: IEndpoint
 {
     public void MapEndpoint(RouteGroupBuilder app)
     {
-        app.MediatePost<RegisterUserRequest, EmptyValue>("auth/registration");
+        app.MediatePost<RegisterUserRequest, string>("auth/registration");
     }
 }

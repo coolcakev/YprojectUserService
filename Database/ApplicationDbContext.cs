@@ -12,10 +12,5 @@ namespace YprojectUserService.Database
             : base(options)
         {
         }
-        
-        // TODO: remove
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-        }
     }
 }

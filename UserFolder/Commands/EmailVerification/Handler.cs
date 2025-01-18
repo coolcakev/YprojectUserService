@@ -18,12 +18,11 @@ public class Handler: IRequestHandler<UpdateVerifyRequest, Response<EmptyValue>>
      
     public async Task<Response<EmptyValue>> Handle(UpdateVerifyRequest request, CancellationToken cancellationToken)
     {
-        //TODO краще використовувати по FindAsync, коли шукаєш по id переглянути по всьому проекті
         var user = await _context.Users.FirstOrDefaultAsync(u=>u.Id == request.Id, cancellationToken);
 
         if (user == null)
         {
-            return FailureResponses.BadRequest("User not found");
+            return FailureResponses.NotFound("userNotFound");
         }
 
         user.IsEmailVerified = true;

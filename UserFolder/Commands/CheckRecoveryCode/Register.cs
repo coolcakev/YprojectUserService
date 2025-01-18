@@ -6,6 +6,6 @@ public class Register: IEndpoint
 {
     public void MapEndpoint(RouteGroupBuilder app)
     {
-        app.MediatePost<CheckRecoveryCodeRequest, CheckRecoveryCodeResponse>("user/check-recovery-code");
+        app.MediatePost<CheckRecoveryCodeRequest, bool>("user/check-recovery-code");
     }
 }

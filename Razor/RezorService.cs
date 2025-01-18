@@ -9,8 +9,7 @@ namespace YprojectUserService.Razor
         public RazorRenderer()
         {
             var projectRoot = Directory.GetCurrentDirectory();
-                //TODO тут немає тягнутися все з папки TEmplates
-            var templatesFolder = Path.Combine(projectRoot, "Razor", "Templates");
+            var templatesFolder = Path.Combine(projectRoot);
 
             _engine = new RazorLightEngineBuilder()
                 .UseFileSystemProject(templatesFolder) 
@@ -18,9 +17,9 @@ namespace YprojectUserService.Razor
                 .Build();
         }
 
-        public async Task<string> RenderAsync<TModel>(string fileName, TModel model)
+        public async Task<string> RenderAsync<TModel>(string filePath, TModel model)
         {
-            var result = await _engine.CompileRenderAsync(fileName, model);
+            var result = await _engine.CompileRenderAsync(filePath, model);
             return result;
         }
     }

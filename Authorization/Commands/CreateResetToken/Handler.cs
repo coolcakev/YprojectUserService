@@ -7,8 +7,7 @@ using YprojectUserService.Database;
 
 namespace YprojectUserService.Authorization.Commands.CreateResetToken;
 
-public record CreateResetTokenRequest([FromBody] CreateResetTokenBody Body) : IHttpRequest<string>;
-public record CreateResetTokenBody(string Email);
+public record CreateResetTokenRequest([FromBody] string Email) : IHttpRequest<string>;
 
 public class Handler: IRequestHandler<CreateResetTokenRequest, Response<string>>
 {
@@ -23,13 +22,11 @@ public class Handler: IRequestHandler<CreateResetTokenRequest, Response<string>>
     
     public async Task<Response<string>> Handle(CreateResetTokenRequest request, CancellationToken cancellationToken)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Body.Email);
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
 
         if (user is null)
         {
-            //TODO тут треба подумати, бо у нас додаток локалізований
-            //TODO тут потрібно буде відсилати NotFound, передивися по всьому проекті
-            return FailureResponses.BadRequest<string>("User not found");
+            return FailureResponses.NotFound<string>("userNotFound");
         }
         
         var token = _jWtService.GenerateToken(user.Id, user.Email, true);

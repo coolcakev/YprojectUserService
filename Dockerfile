@@ -32,4 +32,4 @@ COPY --from=build /app/publish .
 EXPOSE 5001
 
 # Set the entry point for the application
-ENTRYPOINT ["dotnet", "usdtasia.dll"]
+ENTRYPOINT ["dotnet", "YprojectUserService.dll"]

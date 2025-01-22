@@ -1,5 +1,6 @@
-@model YprojectUserService.Razor.Models.EmailModel
+@using YprojectUserService.Razor.Models
 
+<!DOCTYPE html>
 <html>
 <head>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
@@ -77,3 +78,8 @@
 </div>
 </body>
 </html>
+
+@code
+{
+    [Parameter] public EmailModel Model { get; set; }
+}

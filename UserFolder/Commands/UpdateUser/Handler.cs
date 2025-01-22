@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using y_nuget.Auth;
 using y_nuget.Endpoints;
 using YprojectUserService.Database;
 using YprojectUserService.UserFolder.Entities;
@@ -23,12 +24,11 @@ public class UpdateUserBody
 public class Handler : IRequestHandler<UpdateUserRequest, Response<string>>
 {
     private readonly ApplicationDbContext _context;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-
-    public Handler(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor)
+    private readonly AuthService _authService;
+    public Handler(ApplicationDbContext context, AuthService authService)
     {
         _context = context;
-        _httpContextAccessor = httpContextAccessor;
+        _authService = authService;
     }
 
     public async Task<Response<string>> Handle(
@@ -43,7 +43,11 @@ public class Handler : IRequestHandler<UpdateUserRequest, Response<string>>
         //    x => x.Email == userEmailFromToken,
         //    cancellationToken
         //);
-        var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+        var userClaims = _authService.GetCurrentUser();
+        if (userClaims?.Id == null)
+            return FailureResponses.NotFound<string>("Claims not found");
+        
+        var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == userClaims.Id, cancellationToken);
         if (user == null)
             return FailureResponses.NotFound<string>("User not found");
 

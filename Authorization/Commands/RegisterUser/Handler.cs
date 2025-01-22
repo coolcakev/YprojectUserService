@@ -9,6 +9,7 @@ using YprojectUserService.Authorization.Services;
 using YprojectUserService.Database;
 using YprojectUserService.Razor;
 using YprojectUserService.Razor.Models;
+using YprojectUserService.Razor.Templates;
 using YprojectUserService.UserFolder.Entities;
 
 namespace YprojectUserService.Authorization.Commands.RegisterUser;
@@ -49,61 +50,64 @@ public class Handler: IRequestHandler<RegisterUserRequest, y_nuget.Endpoints.Res
         _bus = bus;
     }
     
-public async Task<y_nuget.Endpoints.Response<string>> Handle(RegisterUserRequest request, CancellationToken cancellationToken)
-{
-    var user = await _context.Users.FirstOrDefaultAsync(x => 
-        x.Email == request.Body.Email,
-        cancellationToken);
-    
-    if (user != null) return FailureResponses.BadRequest<string>("loginEmailRegistered");
-    
-    var hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Body.Password);
-    var hashedCodeWord = BCrypt.Net.BCrypt.HashPassword(request.Body.CodeWord);
-    
-    var uniqueLogin = GenerateUniqueLogin(2, 8);
-    
-    user = new User()
+    public async Task<y_nuget.Endpoints.Response<string>> Handle(RegisterUserRequest request, CancellationToken cancellationToken)
     {
-        Id = uniqueLogin,
-        Email = request.Body.Email,
-        Password = hashedPassword,
-        Birthday = request.Body.Birthday,
-        CodeWord = hashedCodeWord,
-        Sex = request.Body.Sex,
-        IsEmailVerified = false,
-        CountryISO = request.Body.CountryISO,
-        StateISO = request.Body.StateISO,
-        CityId = request.Body.CityId
-    };
-    
-    var emailModel = new EmailModel
-    {
-        Title = "Verify your account",
-        Subtitle = "Your account has been successfully created!  Verify your email so we can be sure it's you. This is your unique login that is available to all users",
-        Code = uniqueLogin,
-        EmailButton = new EmailButton()
+        var user = await _context.Users.FirstOrDefaultAsync(x => 
+            x.Email == request.Body.Email,
+            cancellationToken);
+        
+        if (user != null) return FailureResponses.BadRequest<string>("loginEmailRegistered");
+        
+        var hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Body.Password);
+        var hashedCodeWord = BCrypt.Net.BCrypt.HashPassword(request.Body.CodeWord);
+        
+        var uniqueLogin = GenerateUniqueLogin(2, 8);
+        
+        user = new User()
         {
-            Link = "http://example.com",
-            Text = "CLICK TO VERIFY"
-        }
-    };
-    
-    var html = await _razorRenderer.RenderAsync("EmailTemplate.cshtml", emailModel);
-    
-
-    await _bus.Publish(new EmailMessage(
-        To: request.Body.Email,
-        Subject: "Recovery Code Request",
-        Html: html
-    ));
-    
-    await _context.Users.AddAsync(user, cancellationToken);
-    await _context.SaveChangesAsync(cancellationToken);
-    var token = _jWtService.GenerateToken(user.Id, user.Email, false);
-    
-    return SuccessResponses.Ok(token);
-}
-
+            Id = uniqueLogin,
+            Email = request.Body.Email,
+            Password = hashedPassword,
+            Birthday = request.Body.Birthday,
+            CodeWord = hashedCodeWord,
+            Sex = request.Body.Sex,
+            IsEmailVerified = false,
+            CountryISO = request.Body.CountryISO,
+            StateISO = request.Body.StateISO,
+            CityId = request.Body.CityId
+        };
+        
+        var emailModel = new EmailModel
+        {
+            Title = "Verify your account",
+            Subtitle = "Your account has been successfully created!  Verify your email so we can be sure it's you. This is your unique login that is available to all users",
+            Code = uniqueLogin,
+            EmailButton = new EmailButton()
+            {
+                Link = "http://example.com",
+                Text = "CLICK TO VERIFY"
+            }
+        };
+        
+        var parameters = new Dictionary<string, object?>
+        {
+            { "Model", emailModel }
+        };
+        
+        var html = await _razorRenderer.RenderAsync<EmailTemplate>(parameters);
+        
+        await _bus.Publish(new EmailMessage(
+            To: request.Body.Email,
+            Subject: "Recovery Code Request",
+            Html: html
+        ));
+        
+        await _context.Users.AddAsync(user, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
+        var token = _jWtService.GenerateToken(user.Id, user.Email, false);
+        
+        return SuccessResponses.Ok(token);
+    }
 
     private string GenerateUniqueLogin(int lettersCount, int digitsCount)
     {

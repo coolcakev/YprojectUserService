@@ -7,6 +7,7 @@ using y_nuget.RabbitMq;
 using YprojectUserService.Database;
 using YprojectUserService.Razor;
 using YprojectUserService.Razor.Models;
+using YprojectUserService.Razor.Templates;
 
 namespace YprojectUserService.UserFolder.Commands.CreateRecoveryCode;
 
@@ -14,20 +15,18 @@ public record CreateRecoveryCodeRequest() : IHttpRequest<EmptyValue>;
 public class Handler : IRequestHandler<CreateRecoveryCodeRequest, y_nuget.Endpoints.Response<EmptyValue>>
 {
     private readonly ApplicationDbContext _dbContext;
-    private readonly ISendEndpointProvider _publishEndpoint;
     private readonly RazorRenderer _razorRenderer;
     private readonly AuthService _authService;
     private readonly IBus _bus;
+    
     public Handler(
         ApplicationDbContext dbContext, 
-        ISendEndpointProvider publishEndpoint, 
         RazorRenderer razorRenderer, 
         AuthService authService,
         IBus bus
         )
     {
         _dbContext = dbContext;
-        _publishEndpoint = publishEndpoint;
         _razorRenderer = razorRenderer;
         _authService = authService;
         _bus = bus;
@@ -64,9 +63,14 @@ public class Handler : IRequestHandler<CreateRecoveryCodeRequest, y_nuget.Endpoi
             Subtitle = "You have requested to reset your personal data. Please use the code below to proceed with the reset process.",
             Code = code
         };
+        
+        var parameters = new Dictionary<string, object?>
+        {
+            { "Model", emailModel }
+        };
 
-        var html = await _razorRenderer.RenderAsync("Razor/Templates/EmailTemplate.cshtml", emailModel);
-
+        var html = await _razorRenderer.RenderAsync<EmailTemplate>(parameters);
+        
         await _bus.Publish(new EmailMessage(
             To: user.Email,
             Subject: "Recovery Code Request",

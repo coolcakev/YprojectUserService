@@ -1,26 +1,30 @@
-using RazorLight;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace YprojectUserService.Razor
 {
     public class RazorRenderer
     {
-        private readonly RazorLightEngine _engine;
+        private readonly IServiceProvider _serviceProvider;
 
-        public RazorRenderer()
+        public RazorRenderer(IServiceProvider serviceProvider)
         {
-            var projectRoot = Directory.GetCurrentDirectory();
-            var templatesFolder = Path.Combine(projectRoot);
-
-            _engine = new RazorLightEngineBuilder()
-                .UseFileSystemProject(templatesFolder) 
-                .UseMemoryCachingProvider()
-                .Build();
+            _serviceProvider = serviceProvider;
         }
 
-        public async Task<string> RenderAsync<TModel>(string filePath, TModel model)
+        public async Task<string> RenderAsync<TComponent>(Dictionary<string, object?> parameters) where TComponent : IComponent
         {
-            var result = await _engine.CompileRenderAsync(filePath, model);
-            return result;
+            using var htmlRenderer = new HtmlRenderer(_serviceProvider, NullLoggerFactory.Instance);
+
+            var html = await htmlRenderer.Dispatcher.InvokeAsync(async () =>
+            {
+                var parameterView = ParameterView.FromDictionary(parameters);
+                var renderFragment = htmlRenderer.RenderComponentAsync<TComponent>(parameterView);
+                return (await renderFragment).ToHtmlString();
+            });
+
+            return html;
         }
     }
 }

@@ -14,6 +14,7 @@ public static class RabbitMqProducerConfig
         {
             x.UsingRabbitMq((context, cfg) =>
             {
+                //TODO винести це в пакет
                 var rabbitMqSettings = context.GetRequiredService<IOptions<RabbitMqSettings>>().Value;
                 cfg.Host(rabbitMqSettings.Host, rabbitMqSettings.VirtualHost, h =>
                 {
@@ -21,6 +22,7 @@ public static class RabbitMqProducerConfig
                     h.Password(rabbitMqSettings.Password);
                 });
 
+                //TODO подивитися чи можна це забрати 
                 cfg.Message<EmailMessage>(config =>
                 {
                     config.SetEntityName("email_templates_queue");

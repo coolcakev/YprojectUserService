@@ -26,6 +26,7 @@ public class Handler: IRequestHandler<LoginRequest, Response<string>>
     {
         var user = await _context.Users
             .FirstOrDefaultAsync(x => x.Id == request.Body.Login || x.Email == request.Body.Login, cancellationToken);
+        //TODO винести локалізацію в окремий клас переедивитися по всьому проекті
         if (user == null) return FailureResponses.NotFound<string>("userNotFound");
 
         var checkPass = BCrypt.Net.BCrypt.Verify(request.Body.Password, user.Password);

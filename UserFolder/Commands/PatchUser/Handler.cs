@@ -11,6 +11,7 @@ public class PatchUserRequest : GenericPatchRequest<User, string>, IHttpRequest<
 {
 }
 
+//TODO це забрати
 public class PatchUserBody
 {
     public PatchUserBody(string password, DateTime birthday, string codeWord, SexType sex, string countryISO, string stateISO, int cityId)
@@ -36,6 +37,7 @@ public class Handler : IRequestHandler<PatchUserRequest, Response<string>>
         if (user == null)
             return FailureResponses.NotFound<string>("userNotFound");
 
+        //TODO це потрібно забрати
         var testOperations = request.Patches.Operations
             .Where(op => op.OperationType == OperationType.Test)
             .ToList();
@@ -60,6 +62,7 @@ public class Handler : IRequestHandler<PatchUserRequest, Response<string>>
 
         request.Patches.ApplyTo(user);
 
+        //TODO це можна винести в екстеншин
         if (request.Patches.Operations.Any(op => op.path.Equals("/password", StringComparison.OrdinalIgnoreCase)))
         {
             user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);

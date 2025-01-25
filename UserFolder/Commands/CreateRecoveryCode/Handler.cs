@@ -55,6 +55,7 @@ public class Handler : IRequestHandler<CreateRecoveryCodeRequest, y_nuget.Endpoi
         var hashCode = BCrypt.Net.BCrypt.HashPassword(code);
         
         user.RecoveryCode = hashCode;
+        //TODO це перенести до низу функції
         await _dbContext.SaveChangesAsync(cancellationToken);
         
         var emailModel = new EmailModel

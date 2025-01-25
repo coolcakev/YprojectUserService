@@ -18,6 +18,7 @@ public class Handler: IRequestHandler<UpdateVerifyRequest, Response<EmptyValue>>
      
     public async Task<Response<EmptyValue>> Handle(UpdateVerifyRequest request, CancellationToken cancellationToken)
     {
+        //TODO використовувати FindAsync
         var user = await _context.Users.FirstOrDefaultAsync(u=>u.Id == request.Id, cancellationToken);
 
         if (user == null)

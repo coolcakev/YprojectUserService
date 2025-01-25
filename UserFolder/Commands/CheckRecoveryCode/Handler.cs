@@ -28,6 +28,7 @@ public class Handler : IRequestHandler<CheckRecoveryCodeRequest, Response<bool>>
             return FailureResponses.NotFound<bool>("userNotFound");
         }
         
+        //TODO можна вокристати FindASync
         var user = await _dbContext.Users
             .FirstOrDefaultAsync(e => e.Id == currentUser.Id, cancellationToken);
         

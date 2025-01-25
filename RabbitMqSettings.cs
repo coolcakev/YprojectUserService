@@ -1,4 +1,5 @@
 namespace YprojectUserService;
+//TODO запхати це в пакет
 public class RabbitMqSettings
 {
     public string Host { get; set; } = string.Empty;

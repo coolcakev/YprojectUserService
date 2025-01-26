@@ -1,7 +1,4 @@
 using Bogus;
-using MassTransit;
-using Microsoft.Extensions.Options;
-using RabbitMQ.Client;
 using y_nuget.RabbitMq;
 using YprojectUserService.Authorization;
 using YprojectUserService.Database;
@@ -20,7 +17,7 @@ public static class Configuration
         services.AddHttpContextAccessor();
         services.AddSwaggerGen();
         services.AddAuthConfig();
-        services.AddRabbitMqProducerConfig(builder);
+        services.AddRabbitMqConfig();
         builder.Services.AddSingleton<Faker>();
         builder.Services.AddTransient<RazorRenderer>();
 

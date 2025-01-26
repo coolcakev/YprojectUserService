@@ -7,6 +7,7 @@ using y_nuget.Endpoints;
 using y_nuget.RabbitMq;
 using YprojectUserService.Authorization.Services;
 using YprojectUserService.Database;
+using YprojectUserService.Localization;
 using YprojectUserService.Razor;
 using YprojectUserService.Razor.Models;
 using YprojectUserService.Razor.Templates;
@@ -38,7 +39,6 @@ public class Handler: IRequestHandler<RegisterUserRequest, y_nuget.Endpoints.Res
 
     public Handler(
         ApplicationDbContext context, 
-        ISendEndpointProvider publishEndpoint, 
         RazorRenderer razorRenderer, 
         JWtService jWtService,
         IBus bus
@@ -56,7 +56,7 @@ public class Handler: IRequestHandler<RegisterUserRequest, y_nuget.Endpoints.Res
             x.Email == request.Body.Email,
             cancellationToken);
         
-        if (user != null) return FailureResponses.BadRequest<string>("loginEmailRegistered");
+        if (user != null) return FailureResponses.BadRequest<string>(LocalizationKeys.User.LoginEmailRegistered);
         
         var hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Body.Password);
         var hashedCodeWord = BCrypt.Net.BCrypt.HashPassword(request.Body.CodeWord);

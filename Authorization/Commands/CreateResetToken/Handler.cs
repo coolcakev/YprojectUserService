@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using y_nuget.Endpoints;
 using YprojectUserService.Authorization.Services;
 using YprojectUserService.Database;
+using YprojectUserService.Localization;
 
 namespace YprojectUserService.Authorization.Commands.CreateResetToken;
 
@@ -26,7 +27,7 @@ public class Handler: IRequestHandler<CreateResetTokenRequest, Response<string>>
 
         if (user is null)
         {
-            return FailureResponses.NotFound<string>("userNotFound");
+            return FailureResponses.NotFound<string>(LocalizationKeys.User.NotFound);
         }
         
         var token = _jWtService.GenerateToken(user.Id, user.Email, true);

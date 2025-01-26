@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.JsonPatch.Operations;
 using Microsoft.EntityFrameworkCore;
 using y_nuget.Endpoints;
 using YprojectUserService.Database;
+using YprojectUserService.Localization;
 using YprojectUserService.UserFolder.Entities;
 
 namespace YprojectUserService.UserFolder.Commands.PatchUser;
@@ -35,7 +36,7 @@ public class Handler : IRequestHandler<PatchUserRequest, Response<string>>
     {
         var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
         if (user == null)
-            return FailureResponses.NotFound<string>("userNotFound");
+            return FailureResponses.NotFound<string>(LocalizationKeys.User.NotFound);
 
         //TODO це потрібно забрати
         var testOperations = request.Patches.Operations
@@ -48,13 +49,13 @@ public class Handler : IRequestHandler<PatchUserRequest, Response<string>>
             {
                 var plaintextPassword = testOp.value?.ToString();
                 if (!BCrypt.Net.BCrypt.Verify(plaintextPassword, user.Password))
-                    return FailureResponses.BadRequest<string>("incorrectData");
+                    return FailureResponses.BadRequest<string>(LocalizationKeys.Common.IncorrectData);
             }
             else if (testOp.path.Equals("/codeword", StringComparison.OrdinalIgnoreCase))
             {
                 var plaintextCodeWord = testOp.value?.ToString();
                 if (!BCrypt.Net.BCrypt.Verify(plaintextCodeWord, user.CodeWord))
-                    return FailureResponses.BadRequest<string>("incorrectData");
+                    return FailureResponses.BadRequest<string>(LocalizationKeys.Common.IncorrectData);
             }
 
             request.Patches.Operations.Remove(testOp);

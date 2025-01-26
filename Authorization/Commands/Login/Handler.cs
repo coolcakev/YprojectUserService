@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using y_nuget.Endpoints;
 using YprojectUserService.Authorization.Services;
 using YprojectUserService.Database;
+using YprojectUserService.Localization;
 
 namespace YprojectUserService.Authorization.Commands.Login;
 
@@ -26,12 +27,12 @@ public class Handler: IRequestHandler<LoginRequest, Response<string>>
     {
         var user = await _context.Users
             .FirstOrDefaultAsync(x => x.Id == request.Body.Login || x.Email == request.Body.Login, cancellationToken);
-        //TODO винести локалізацію в окремий клас переедивитися по всьому проекті
-        if (user == null) return FailureResponses.NotFound<string>("userNotFound");
+        
+        if (user == null) return FailureResponses.NotFound<string>(LocalizationKeys.User.NotFound);
 
         var checkPass = BCrypt.Net.BCrypt.Verify(request.Body.Password, user.Password);
 
-        if (!checkPass) return FailureResponses.NotFound<string>("invalidPassword");
+        if (!checkPass) return FailureResponses.BadRequest<string>(LocalizationKeys.User.InvalidPassword);
         
         var token = _jWtService.GenerateToken(user.Id, user.Email, false);
 

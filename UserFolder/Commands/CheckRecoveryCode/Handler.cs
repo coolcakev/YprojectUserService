@@ -1,9 +1,9 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using y_nuget.Auth;
 using y_nuget.Endpoints;
 using YprojectUserService.Database;
+using YprojectUserService.Localization;
 
 namespace YprojectUserService.UserFolder.Commands.CheckRecoveryCode;
 
@@ -25,17 +25,15 @@ public class Handler : IRequestHandler<CheckRecoveryCodeRequest, Response<bool>>
 
         if (currentUser is null)
         {
-            return FailureResponses.NotFound<bool>("userNotFound");
+            return FailureResponses.NotFound<bool>(LocalizationKeys.User.NotFound);
         }
         
-        //TODO можна вокристати FindASync
-        var user = await _dbContext.Users
-            .FirstOrDefaultAsync(e => e.Id == currentUser.Id, cancellationToken);
+        var user = await _dbContext.Users.FindAsync(currentUser.Id, cancellationToken);
         
         if (user == null)
         {
             return FailureResponses.BadRequest<bool>(
-                "recoveryCodeNotFound"
+                LocalizationKeys.Recovery.CodeNotFound
             );
         } 
         
@@ -44,7 +42,7 @@ public class Handler : IRequestHandler<CheckRecoveryCodeRequest, Response<bool>>
         if (!checkResult)
         {
             return FailureResponses.BadRequest<bool>(
-                "recoveryCodeProviderIncorrect"
+                LocalizationKeys.Recovery.ProviderIncorrect
             );
         }
         

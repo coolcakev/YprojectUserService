@@ -20,9 +20,8 @@ namespace YprojectUserService.Razor
             var html = await htmlRenderer.Dispatcher.InvokeAsync(async () =>
             {
                 var parameterView = ParameterView.FromDictionary(parameters);
-                    //TODO чому ти тут не авейтаєш, а знизу евейтаєш?
-                var renderFragment = htmlRenderer.RenderComponentAsync<TComponent>(parameterView);
-                return (await renderFragment).ToHtmlString();
+                var renderFragment = await htmlRenderer.RenderComponentAsync<TComponent>(parameterView);
+                return renderFragment.ToHtmlString();
             });
 
             return html;

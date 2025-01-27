@@ -1,8 +1,9 @@
 using Bogus;
+using y_nuget;
 using y_nuget.RabbitMq;
-using YprojectUserService.Authorization;
-using YprojectUserService.Database;
 using YprojectUserService.Razor;
+using YprojectUserService.Database;
+using YprojectUserService.Authorization;
 
 namespace YprojectUserService.Configurations;
 
@@ -12,14 +13,14 @@ public static class Configuration
     {   
         var configuration = builder.Configuration;
         
-        services.Configure<RabbitMqSettings>(configuration.GetSection("RabbitMQ"));
         services.AddDataBaseConfig(configuration);
         services.AddHttpContextAccessor();
         services.AddSwaggerGen();
         services.AddAuthConfig();
-        services.AddRabbitMqConfig();
-        builder.Services.AddSingleton<Faker>();
-        builder.Services.AddTransient<RazorRenderer>();
+        services.AddRabbitMqConfig(builder);
+        services.AddYNugetConfiguration(builder);
+        services.AddSingleton<Faker>();
+        services.AddTransient<RazorRenderer>();
 
         return services;
     }   

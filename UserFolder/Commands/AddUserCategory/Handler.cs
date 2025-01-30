@@ -27,7 +27,6 @@ public class Handler : IRequestHandler<AddUserCategoryRequest, Response<EmptyVal
         _dbContext = context;
     }
 
-    // якщо вже має категорії ??
     public async Task<Response<EmptyValue>> Handle(AddUserCategoryRequest request, CancellationToken cancellationToken)
     {
         var user = await _dbContext.Users.FindAsync(request.Id);
@@ -36,6 +35,11 @@ public class Handler : IRequestHandler<AddUserCategoryRequest, Response<EmptyVal
         {
             return FailureResponses.NotFound(LocalizationKeys.User.NotFound);
         }
+        
+        var existingCategories = _dbContext.UserCategories
+            .Where(x => x.UserId == user.Id);
+
+        _dbContext.UserCategories.RemoveRange(existingCategories);
             
         var mainCategory = new UserCategory
         {

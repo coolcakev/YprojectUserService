@@ -30,7 +30,7 @@ public class Handler: IRequestHandler<CreateResetTokenRequest, Response<string>>
             return FailureResponses.NotFound<string>(LocalizationKeys.User.NotFound);
         }
         
-        var token = _jWtService.GenerateToken(user.Id, user.Email, true);
+        var token = _jWtService.GenerateToken(user.Id, user.Email, true, user.AgeGroup, user.Sex);
 
         return SuccessResponses.Ok(token);
     }

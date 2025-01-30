@@ -63,48 +63,66 @@ public class Handler: IRequestHandler<RegisterUserRequest, y_nuget.Endpoints.Res
         
         var uniqueLogin = GenerateUniqueLogin(2, 8);
         
+        var today = DateTime.Today;
+        int age = today.Year - request.Body.Birthday.Year;
+        if (request.Body.Birthday.Date > today.AddYears(-age))
+        {
+            age--;
+        }
+        
+        var userAgeGroup = age switch
+        {
+            >= 14 and <= 17 => AgeGroup.Teenagers,
+            >= 18 and <= 24 => AgeGroup.Young,
+            >= 25 and <= 34 => AgeGroup.ActiveDevelopment,
+            >= 35 and <= 44 => AgeGroup.AdultLife,
+            >= 45 and <= 54 => AgeGroup.LateMaturity,
+            _ => AgeGroup.ActiveLongevity
+        };
+        
         user = new User()
         {
             Id = uniqueLogin,
             Email = request.Body.Email,
             Password = hashedPassword,
             Birthday = request.Body.Birthday,
+            AgeGroup = userAgeGroup,
             CodeWord = hashedCodeWord,
             Sex = request.Body.Sex,
             IsEmailVerified = false,
             CountryISO = request.Body.CountryISO,
             StateISO = request.Body.StateISO,
-            CityId = request.Body.CityId
+            CityId = request.Body.CityId,
         };
         
-        var emailModel = new EmailModel
-        {
-            Title = "Verify your account",
-            Subtitle = "Your account has been successfully created!  Verify your email so we can be sure it's you. This is your unique login that is available to all users",
-            Code = uniqueLogin,
-            EmailButton = new EmailButton()
-            {
-                Link = "http://example.com",
-                Text = "CLICK TO VERIFY"
-            }
-        };
-        
-        var parameters = new Dictionary<string, object?>
-        {
-            { "Model", emailModel }
-        };
-        
-        var html = await _razorRenderer.RenderAsync<EmailTemplate>(parameters);
-        
-        await _bus.Publish(new EmailMessage(
-            To: request.Body.Email,
-            Subject: "Recovery Code Request",
-            Html: html
-        ));
+        // var emailModel = new EmailModel
+        // {
+        //     Title = "Verify your account",
+        //     Subtitle = "Your account has been successfully created!  Verify your email so we can be sure it's you. This is your unique login that is available to all users",
+        //     Code = uniqueLogin,
+        //     EmailButton = new EmailButton()
+        //     {
+        //         Link = "http://example.com",
+        //         Text = "CLICK TO VERIFY"
+        //     }
+        // };
+        //
+        // var parameters = new Dictionary<string, object?>
+        // {
+        //     { "Model", emailModel }
+        // };
+        //
+        // var html = await _razorRenderer.RenderAsync<EmailTemplate>(parameters);
+        //
+        // await _bus.Publish(new EmailMessage(
+        //     To: request.Body.Email,
+        //     Subject: "Recovery Code Request",
+        //     Html: html
+        // ));
         
         await _context.Users.AddAsync(user, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
-        var token = _jWtService.GenerateToken(user.Id, user.Email, false);
+        var token = _jWtService.GenerateToken(user.Id, user.Email, false, user.AgeGroup, user.Sex);
         
         return SuccessResponses.Ok(token);
     }

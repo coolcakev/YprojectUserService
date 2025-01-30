@@ -13,6 +13,7 @@ public class Handler : IRequestHandler<CheckRecoveryCodeRequest, Response<bool>>
 {
     private readonly ApplicationDbContext _dbContext;
     private readonly AuthService _authService;
+    
     public Handler(ApplicationDbContext dbContext,  AuthService authService)
     {
         _authService = authService;

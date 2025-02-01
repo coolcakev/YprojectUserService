@@ -72,7 +72,10 @@
     <div class="email-body">@Model.Body</div>
 
     <div class="email-footer">
-        If this email is unfamiliar, please contact @Model.SupportEmail<br />
+        See our <a href="@Model.TermsOfUseUrl" target="_blank">Terms of Use</a> and
+        <a href="@Model.PrivacyPolicyUrl" target="_blank">Privacy Policy</a>.<br/>
+        If this email is unfamiliar, please contact @Model.SupportEmail<br/>
+        Best regards, The Y Project team!<br/>
         &copy; @DateTime.Now.Year Y-Project
     </div>
 </div>

@@ -34,6 +34,7 @@ public class Handler: IRequestHandler<LoginRequest, Response<string>>
 
         if (!checkPass) return FailureResponses.BadRequest<string>(LocalizationKeys.User.InvalidPassword);
         
+        //TODO maybe set all user params in token in future useful?(sarcasm)
         var token = _jWtService.GenerateToken(user.Id, user.Email, false, user.AgeGroup, user.Sex);
 
         return SuccessResponses.Ok(token);

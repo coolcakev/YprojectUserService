@@ -1,5 +1,6 @@
 namespace YprojectUserService.UserFolder.Entities;
 
+//TODO притримуватися одного стиля в енамках
 public enum SexType
 {
     Male,

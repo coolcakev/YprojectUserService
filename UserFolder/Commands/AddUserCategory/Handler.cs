@@ -38,9 +38,10 @@ public class Handler : IRequestHandler<AddUserCategoryRequest, Response<EmptyVal
         
         var existingCategories = _dbContext.UserCategories
             .Where(x => x.UserId == user.Id);
-
+        //TODO чоми всі видаляємо??
         _dbContext.UserCategories.RemoveRange(existingCategories);
             
+        //TODO переробити сетаня категорій і підкатегорій є спільна логіка, якось обєднати в один форіч або селект
         var mainCategory = new UserCategory
         {
             Id = Guid.NewGuid(),
@@ -50,6 +51,7 @@ public class Handler : IRequestHandler<AddUserCategoryRequest, Response<EmptyVal
             CategoryTitleId = request.Body.MainCategory.CategoryTitleId
         };
         
+        //TODO who use AddAsync
         _dbContext.UserCategories.Add(mainCategory);
         
         foreach (var subCategory in request.Body.SubCategories)
@@ -62,7 +64,7 @@ public class Handler : IRequestHandler<AddUserCategoryRequest, Response<EmptyVal
                 CategoryId = subCategory.CategoryId,
                 CategoryTitleId = subCategory.CategoryTitleId
             };
-
+            //TODO who use AddAsync
             _dbContext.UserCategories.Add(userCategory);
         }
         

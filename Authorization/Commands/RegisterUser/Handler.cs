@@ -27,7 +27,7 @@ public class Handler: IRequestHandler<RegisterUserRequest, y_nuget.Endpoints.Res
 {
     private readonly JWtService _jWtService;
     private readonly ApplicationDbContext _context;
-
+    
     private static readonly Faker Faker = new Faker();
 
     public Handler(
@@ -52,6 +52,7 @@ public class Handler: IRequestHandler<RegisterUserRequest, y_nuget.Endpoints.Res
         
         var uniqueLogin = GenerateUniqueLogin(2, 8);
         
+        //TODO винести всі обрахунки з віком і сетання вікової групи в метод в класі User
         var today = DateTime.Today;
         int age = today.Year - request.Body.Birthday.Year;
         if (request.Body.Birthday.Date > today.AddYears(-age))

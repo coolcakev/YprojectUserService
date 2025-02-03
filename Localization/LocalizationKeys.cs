@@ -13,6 +13,8 @@ public static class LocalizationKeys
     {
         public const string CodeNotFound = "recoveryCodeNotFound";
         public const string ProviderIncorrect = "recoveryCodeProviderIncorrect";
+        public const string WordNotFound = "recoveryWordNotFound";
+        public const string ProviderWordIncorrect = "recoveryWordProviderIncorrect";
     }
 
     public static class Common

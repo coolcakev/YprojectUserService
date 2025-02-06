@@ -1,10 +1,6 @@
-namespace YprojectUserService.UserFolder.Entities;
+using y_nuget.RabbitMq;
 
-public enum CategoryType
-{
-    Primary,
-    Addition
-}
+namespace YprojectUserService.UserFolder.Entities;
 
 public class UserCategory
 {
@@ -12,6 +8,6 @@ public class UserCategory
     public User User { get; set; }
     public string UserId { get; set; } 
     public Guid CategoryId { get; set; } 
-    public Guid CategoryTitleId { get; set; }
+    public Guid CategoryTitleKey { get; set; }
     public CategoryType CategoryRole { get; set; } 
 }

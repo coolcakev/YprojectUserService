@@ -1,7 +1,5 @@
-using Bogus;
 using YprojectUserService.Configurations;
 using YprojectUserService.Database;
-using y_nuget;
 using y_nuget.Endpoints;
 
 var builder = WebApplication.CreateBuilder(args);

@@ -13,6 +13,7 @@ public record GetUserByIdResponse(
     string Email, 
     bool IsEmailVerified,
     DateTime Birthday,
+    AgeGroup AgeGroup,
     SexType Sex,
     string CountryISO,
     string StateISO,
@@ -35,14 +36,16 @@ public class Handler: IRequestHandler<GetUserByIdRequest, Response<GetUserByIdRe
 
         var userDto = new GetUserByIdResponse(
             user.Id,
-            user.Email, 
+            user.Email,
             user.IsEmailVerified,
-            user.Birthday, 
+            user.Birthday,
+            user.AgeGroup,
             user.Sex,
             user.CountryISO,
             user.StateISO,
             user.CityId
         );
+        
         return SuccessResponses.Ok(userDto);
     }
 }

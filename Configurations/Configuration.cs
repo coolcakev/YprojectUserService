@@ -4,6 +4,7 @@ using y_nuget.RabbitMq;
 using YprojectUserService.Razor;
 using YprojectUserService.Database;
 using YprojectUserService.Authorization;
+using YprojectUserService.RabbitMq;
 
 namespace YprojectUserService.Configurations;
 
@@ -17,7 +18,10 @@ public static class Configuration
         services.AddHttpContextAccessor();
         services.AddSwaggerGen();
         services.AddAuthConfig();
-        services.AddRabbitMqConfig(builder);
+        services.AddRabbitMqConfig(builder, x =>
+        {
+            x.AddConsumer<UserCategoryConsumerService>();
+        });
         services.AddYNugetConfiguration(builder);
         services.AddSingleton<Faker>();
         services.AddTransient<RazorRenderer>();

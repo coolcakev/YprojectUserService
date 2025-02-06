@@ -23,7 +23,7 @@ public record RegisterUserBody(
     int CityId
 );
 
-public class Handler: IRequestHandler<RegisterUserRequest, y_nuget.Endpoints.Response<string>>
+public class Handler: IRequestHandler<RegisterUserRequest, Response<string>>
 {
     private readonly JWtService _jWtService;
     private readonly ApplicationDbContext _context;
@@ -52,31 +52,12 @@ public class Handler: IRequestHandler<RegisterUserRequest, y_nuget.Endpoints.Res
         
         var uniqueLogin = GenerateUniqueLogin(2, 8);
         
-        //TODO винести всі обрахунки з віком і сетання вікової групи в метод в класі User
-        var today = DateTime.Today;
-        int age = today.Year - request.Body.Birthday.Year;
-        if (request.Body.Birthday.Date > today.AddYears(-age))
-        {
-            age--;
-        }
-        
-        var userAgeGroup = age switch
-        {
-            >= 14 and <= 17 => AgeGroup.Teenagers,
-            >= 18 and <= 24 => AgeGroup.Young,
-            >= 25 and <= 34 => AgeGroup.ActiveDevelopment,
-            >= 35 and <= 44 => AgeGroup.AdultLife,
-            >= 45 and <= 54 => AgeGroup.LateMaturity,
-            _ => AgeGroup.ActiveLongevity
-        };
-        
         user = new User()
         {
             Id = uniqueLogin,
             Email = request.Body.Email,
             Password = hashedPassword,
             Birthday = request.Body.Birthday,
-            AgeGroup = userAgeGroup,
             CodeWord = hashedCodeWord,
             Sex = request.Body.Sex,
             IsEmailVerified = false,
@@ -84,10 +65,12 @@ public class Handler: IRequestHandler<RegisterUserRequest, y_nuget.Endpoints.Res
             StateISO = request.Body.StateISO,
             CityId = request.Body.CityId,
         };
+
+        user.AgeGroup = user.DetermineAgeGroup();
         
         await _context.Users.AddAsync(user, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
-        var token = _jWtService.GenerateToken(user.Id, user.Email, true, user.AgeGroup, user.Sex);
+        var token = _jWtService.GenerateToken(user.Id, user.Email, true);
         
         return SuccessResponses.Ok(token);
     }

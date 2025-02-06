@@ -15,15 +15,13 @@ namespace YprojectUserService.Authorization.Services
             _authOptions = authOptions.Value;
         }
 
-        public string GenerateToken(string id, string email, bool isResetToken, AgeGroup ageGroup, SexType sexType)
+        public string GenerateToken(string id, string email, bool isResetToken)
         {
             var claims = new List<Claim>
             {
                 new("id", id),
                 new("userEmail", email),
-                new("isResetToken", isResetToken.ToString()),
-                new("sexType", sexType.ToString()),
-                new("ageGroup", ageGroup.ToString())
+                new("isResetToken", isResetToken.ToString())
             };
 
             var jwt = new JwtSecurityToken(

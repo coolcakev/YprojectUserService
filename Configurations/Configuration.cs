@@ -1,4 +1,5 @@
 using Bogus;
+using MassTransit;
 using y_nuget;
 using y_nuget.RabbitMq;
 using YprojectUserService.Razor;
@@ -21,11 +22,24 @@ public static class Configuration
         services.AddRabbitMqConfig(builder, x =>
         {
             x.AddConsumer<UserCategoryConsumerService>();
+            
+            x.AddEntityFrameworkOutbox<ApplicationDbContext>(o =>
+            {
+                o.UsePostgres();
+                o.QueryDelay = TimeSpan.FromSeconds(10);
+                o.DuplicateDetectionWindow = TimeSpan.FromSeconds(30);
+            });
+            
+            x.AddConfigureEndpointsCallback((context, name, cfg) =>
+            {
+                cfg.UseEntityFrameworkOutbox<ApplicationDbContext>(context); 
+            });
         });
+        
         services.AddYNugetConfiguration(builder);
         services.AddSingleton<Faker>();
         services.AddTransient<RazorRenderer>();
 
         return services;
     }   
-}       
+}

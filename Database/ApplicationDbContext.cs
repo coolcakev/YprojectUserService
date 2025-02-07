@@ -1,4 +1,5 @@
 
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using YprojectUserService.UserFolder.Entities;
 
@@ -15,6 +16,10 @@ namespace YprojectUserService.Database
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.AddInboxStateEntity();
+            modelBuilder.AddOutboxStateEntity();
+            modelBuilder.AddOutboxMessageEntity();
+            
             modelBuilder.Entity<UserCategory>()
                 .HasOne(uc => uc.User)
                 .WithMany(u => u.Categories)

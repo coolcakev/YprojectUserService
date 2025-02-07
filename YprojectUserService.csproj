@@ -15,7 +15,8 @@
         <PackageReference Include="Hangfire.Core" Version="1.8.16" />
         <PackageReference Include="Hangfire.PostgreSql" Version="1.20.10" />
         <PackageReference Include="HtmlAgilityPack" Version="1.11.72" />
-        <PackageReference Include="MassTransit" Version="8.3.5-develop.2187" />
+        <PackageReference Include="MassTransit" Version="8.3.7-develop.2215" />
+        <PackageReference Include="MassTransit.EntityFrameworkCore" Version="8.3.7-develop.2215" />
         <PackageReference Include="MassTransit.RabbitMQ" Version="8.3.5-develop.2187" />
         <PackageReference Include="MediatR" Version="12.4.1" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.11" />

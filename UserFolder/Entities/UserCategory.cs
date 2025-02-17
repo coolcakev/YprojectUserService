@@ -1,4 +1,4 @@
-using y_nuget.RabbitMq;
+using y_nuget.Sources;
 
 namespace YprojectUserService.UserFolder.Entities;
 

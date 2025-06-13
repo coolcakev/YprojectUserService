@@ -1,22 +1,15 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.JsonPatch.Operations;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
 using y_nuget.Endpoints;
 using YprojectUserService.Database;
+using YprojectUserService.Localization;
 using YprojectUserService.UserFolder.Entities;
 
 namespace YprojectUserService.UserFolder.Commands.PatchUser;
 
 public class PatchUserRequest : GenericPatchRequest<User, string>, IHttpRequest<string>
 {
-}
-
-//TODO це забрати
-public class PatchUserBody
-{
-    public PatchUserBody(string password, DateTime birthday, string codeWord, SexType sex, string countryISO, string stateISO, int cityId)
-    {
-    }
 }
 
 public class Handler : IRequestHandler<PatchUserRequest, Response<string>>
@@ -35,44 +28,33 @@ public class Handler : IRequestHandler<PatchUserRequest, Response<string>>
     {
         var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
         if (user == null)
-            return FailureResponses.NotFound<string>("userNotFound");
-
-        //TODO це потрібно забрати
-        var testOperations = request.Patches.Operations
-            .Where(op => op.OperationType == OperationType.Test)
-            .ToList();
-
-        foreach (var testOp in testOperations)
-        {
-            if (testOp.path.Equals("/password", StringComparison.OrdinalIgnoreCase))
-            {
-                var plaintextPassword = testOp.value?.ToString();
-                if (!BCrypt.Net.BCrypt.Verify(plaintextPassword, user.Password))
-                    return FailureResponses.BadRequest<string>("incorrectData");
-            }
-            else if (testOp.path.Equals("/codeword", StringComparison.OrdinalIgnoreCase))
-            {
-                var plaintextCodeWord = testOp.value?.ToString();
-                if (!BCrypt.Net.BCrypt.Verify(plaintextCodeWord, user.CodeWord))
-                    return FailureResponses.BadRequest<string>("incorrectData");
-            }
-
-            request.Patches.Operations.Remove(testOp);
-        }
+            return FailureResponses.NotFound<string>(LocalizationKeys.User.NotFound);
 
         request.Patches.ApplyTo(user);
 
-        //TODO це можна винести в екстеншин
-        if (request.Patches.Operations.Any(op => op.path.Equals("/password", StringComparison.OrdinalIgnoreCase)))
+        request.Patches.ApplyIfOperationExists("/password", () =>
         {
             user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
-        }
-        if (request.Patches.Operations.Any(op => op.path.Equals("/codeword", StringComparison.OrdinalIgnoreCase)))
+        });
+
+        request.Patches.ApplyIfOperationExists("/codeword", () =>
         {
             user.CodeWord = BCrypt.Net.BCrypt.HashPassword(user.CodeWord);
-        }
+        });
+
 
         await _context.SaveChangesAsync(cancellationToken);
         return SuccessResponses.Ok("Success");
+    }
+}
+
+public static class JsonPatchExtensions
+{
+    public static void ApplyIfOperationExists(this JsonPatchDocument<User> patches, string path, Action action)
+    {
+        if (patches.Operations.Any(op => op.path.Equals(path, StringComparison.OrdinalIgnoreCase)))
+        {
+            action();
+        }
     }
 }

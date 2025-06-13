@@ -5,6 +5,7 @@ using y_nuget.Auth;
 using y_nuget.Endpoints;
 using y_nuget.RabbitMq;
 using YprojectUserService.Database;
+using YprojectUserService.Localization;
 using YprojectUserService.Razor;
 using YprojectUserService.Razor.Models;
 using YprojectUserService.Razor.Templates;
@@ -35,10 +36,10 @@ public class Handler : IRequestHandler<CreateRecoveryCodeRequest, y_nuget.Endpoi
     public async Task<y_nuget.Endpoints.Response<EmptyValue>> Handle(CreateRecoveryCodeRequest request, CancellationToken cancellationToken)
     {
         var currentUser = _authService.GetCurrentUser();
-
+        
         if (currentUser is null)
         {
-            return FailureResponses.NotFound("userNotFound");
+            return FailureResponses.NotFound(LocalizationKeys.User.NotFound);
         }
         
         var user = await _dbContext.Users
@@ -46,7 +47,7 @@ public class Handler : IRequestHandler<CreateRecoveryCodeRequest, y_nuget.Endpoi
         
         if (user == null)
         {
-            return FailureResponses.NotFound("userNotFound");
+            return FailureResponses.NotFound(LocalizationKeys.User.NotFound);
         } 
         
         var random = new Random();
@@ -55,7 +56,7 @@ public class Handler : IRequestHandler<CreateRecoveryCodeRequest, y_nuget.Endpoi
         var hashCode = BCrypt.Net.BCrypt.HashPassword(code);
         
         user.RecoveryCode = hashCode;
-        //TODO це перенести до низу функції
+
         await _dbContext.SaveChangesAsync(cancellationToken);
         
         var emailModel = new EmailModel

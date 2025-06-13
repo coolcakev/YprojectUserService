@@ -13,4 +13,6 @@ public class EmailModel
     public EmailButton? EmailButton { get; set; } 
     public string? Code { get; set; }
     public string SupportEmail { get; } = "support@y-project.com";
+    public string TermsOfUseUrl { get; } = "http://example.com";
+    public string PrivacyPolicyUrl { get; } = "http://example.com";
 }

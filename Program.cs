@@ -10,7 +10,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddConfiguration(builder);
-builder.Services.AddYNugetConfiguration(builder);
 
 var app = builder.Build();
 

@@ -1,7 +1,7 @@
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using y_nuget.Endpoints;
 using YprojectUserService.Database;
+using YprojectUserService.Localization;
 
 namespace YprojectUserService.UserFolder.Commands.EmailVerification;
 
@@ -18,12 +18,11 @@ public class Handler: IRequestHandler<UpdateVerifyRequest, Response<EmptyValue>>
      
     public async Task<Response<EmptyValue>> Handle(UpdateVerifyRequest request, CancellationToken cancellationToken)
     {
-        //TODO використовувати FindAsync
-        var user = await _context.Users.FirstOrDefaultAsync(u=>u.Id == request.Id, cancellationToken);
+        var user = await _context.Users.FindAsync(request.Id, cancellationToken);
 
         if (user == null)
         {
-            return FailureResponses.NotFound("userNotFound");
+            return FailureResponses.NotFound(LocalizationKeys.User.NotFound);
         }
 
         user.IsEmailVerified = true;

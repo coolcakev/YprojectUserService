@@ -1,6 +1,7 @@
 using MediatR;
 using y_nuget.Endpoints;
 using YprojectUserService.Database;
+using YprojectUserService.Localization;
 using YprojectUserService.UserFolder.Entities;
 
 namespace YprojectUserService.UserFolder.Queries.GetUserById;
@@ -30,7 +31,7 @@ public class Handler: IRequestHandler<GetUserByIdRequest, Response<GetUserByIdRe
     public async Task<Response<GetUserByIdResponse>> Handle(GetUserByIdRequest request, CancellationToken cancellationToken)
     {
         var user = await _context.Users.FindAsync(request.Id);
-        if (user == null) return FailureResponses.NotFound<GetUserByIdResponse>("User not found");
+        if (user == null) return FailureResponses.NotFound<GetUserByIdResponse>(LocalizationKeys.User.NotFound);
 
         var userDto = new GetUserByIdResponse(
             user.Id,

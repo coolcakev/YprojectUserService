@@ -3,6 +3,7 @@ using System.Security.Claims;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using y_nuget.Auth;
+using YprojectUserService.UserFolder.Entities;
 
 namespace YprojectUserService.Authorization.Services
 {
@@ -14,13 +15,15 @@ namespace YprojectUserService.Authorization.Services
             _authOptions = authOptions.Value;
         }
 
-        public string GenerateToken(string id, string email, bool isResetToken)
+        public string GenerateToken(string id, string email, bool isResetToken, AgeGroup ageGroup, SexType sexType)
         {
             var claims = new List<Claim>
             {
                 new("id", id),
                 new("userEmail", email),
-                new("isResetToken", isResetToken.ToString())
+                new("isResetToken", isResetToken.ToString()),
+                new("sexType", sexType.ToString()),
+                new("ageGroup", ageGroup.ToString())
             };
 
             var jwt = new JwtSecurityToken(
